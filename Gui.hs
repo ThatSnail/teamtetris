@@ -5,4 +5,4 @@ canvasID :: ElemID
 canvasID = "canvas"
 
 main :: IO ()
-main = getCanvasById canvasID
+main = alert "WELCOME FRIENDS"
