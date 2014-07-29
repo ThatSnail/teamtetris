@@ -1,26 +1,30 @@
 module Board (
       Board ( Board )
     , isOccupied
+    , boardWidth
+    , boardHeight
+-- Temp
+    , emptyBoard
     ) where
 
-data TileState = Empty | Occupied
+data TileState = Empty | Occupied deriving Eq
 type State = [[TileState]]
 
 data Board = Board { 
       state :: State
     }
 
-width :: Int
-width = 10
+boardWidth :: Int
+boardWidth = 10
 
-height :: Int
-height = 12
+boardHeight :: Int
+boardHeight = 22
 
-isOccupied :: Board -> Int -> Int -> TileState
-isOccupied board x y = (state board) !! x !! y
+isOccupied :: Board -> Int -> Int -> Bool
+isOccupied board x y = ((state board) !! x !! y) == Occupied
 
 emptyState :: State
-emptyState = replicate height $ replicate width Empty
+emptyState = replicate boardHeight $ replicate boardWidth Empty
 
 emptyBoard :: Board
 emptyBoard = Board emptyState
