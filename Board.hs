@@ -1,9 +1,15 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Board (
       Board ( Board )
     , isOccupied
     , updateBoard
     ) where
 
+import Control.Lens
+import System.Random
+
+import Pieces
 import Team
 import ActivePiece
 import BoardDimensions
@@ -13,31 +19,33 @@ data TileState = Empty | Occupied deriving Eq
 type State = [[TileState]]
 
 data Board = Board { 
-      state :: State
-    , team :: Team
-    , activePieces :: [ActivePiece]
-    , spawnPoints :: [Position]
-    , seed :: StdGen
+      _state :: State
+    , _team :: Team
+    , _activePieces :: [ActivePiece]
+    , _spawnPoints :: [Position]
+    , _seed :: StdGen
     }
 
+makeLenses ''Board
+
 isOccupied :: Board -> Int -> Int -> Bool
-isOccupied board x y = ((state board) !! x !! y) == Occupied
+isOccupied board x y = ((_state board) !! x !! y) == Occupied
 
 emptyState :: State
 emptyState = replicate boardHeight $ replicate boardWidth Empty
 
 updateBoard :: Board -> Board
-updateBoard board@(Board state _ activePieces spawnPoints seed) = foldr f board { activePieces = [] } $ zipWith activePieces spawnPoints
+updateBoard board = foldl f (board & activePieces .~ []) $ zip (board^.activePieces) (board^.spawnPoints)
     where
         -- f :: Board -> (activePiece :: ActivePiece, spawnPoint :: Position)
-        f board@(Board state _ aps _ seed) (ap sp)
-            | snd nap == False = board { activePieces = nap : aps }
-            | otherwise        = board { state = addPieceToState aps state, activePieces = (nap { pos = sp, pieceType = fst randomPieceType seed, orientation = First } ) : aps, seed = snd randomPieceType seed }
+        f board (ap, sp)
+            | snd nap == False = board & activePieces %~ ((fst nap):)
+            | otherwise        = board & (activePieces %~ (((fst nap) & (pos .~ sp) . (pieceType .~ fst (randomPieceType (board^.seed))) . (orientation .~ First)):)) . (state %~ addPieceToState ap) . (seed %~ snd . randomPieceType)
                 where
                     nap = updatePiece ap
 
 addPieceToState :: ActivePiece -> State -> State
-addPieceToState (ActivePiece _ (px, py) pieceType orientation) state = foldr addPosToState state $ map (\(x, y) -> (x + px, y + py)) $ shape pieceType orientation
+addPieceToState piece state = foldr addPosToState state $ map (\(x, y) -> (x + piece^.pos._1, y + piece^.pos._2)) $ shape (piece^.pieceType) (piece^.orientation)
 
 addPosToState :: Position -> State -> State
-addPosToState (x, y) state = state !! x !! y = Occupied
+addPosToState (x, y) state = state & element x . element y .~ Occupied

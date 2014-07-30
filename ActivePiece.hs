@@ -1,7 +1,14 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module ActivePiece (
-      ActivePiece ( ActivePiece )
+      ActivePiece ( ActivePiece, _player, _pos, _pieceType, _orientation )
+    , pos
+    , pieceType
+    , orientation
     , updatePiece
     ) where
+
+import Control.Lens
 
 import Player
 import Pieces
@@ -9,22 +16,23 @@ import Utils
 import BoardDimensions
 
 data ActivePiece = ActivePiece {
-      player :: Player
-    , pos :: Position
-    , pieceType :: PieceType
-    , orientation :: Orientation
+      _player :: Player
+    , _pos :: Position
+    , _pieceType :: PieceType
+    , _orientation :: Orientation
     }
+makeLenses ''ActivePiece
 
 -- Returns new piece and whether or not to respawn a piece
 updatePiece :: ActivePiece -> (ActivePiece, Bool)
-updatePiece piece@(ActivePiece { pos = (px, py), pieceType = pieceType', orientation = orientation' })
-    | validPos pieceType' orientation' npos = (piece { pos = npos }, False)
-    | otherwise                = (piece, True)
+updatePiece piece
+    | validPos (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
+    | otherwise                                             = (piece, True)
         where
-            npos = (px, py - 1)
+            npos = (piece^.pos) & _2 %~ ((-) 1)
 
 validPos :: PieceType -> Orientation -> Position -> Bool
-validPos pieceType orientation (px, py) = foldr1 (&&) $ map (validPos' . (\(x, y) -> (x + px, y + py)))  $ shape pieceType orientation
+validPos pieceType orientation (px, py) = foldr1 (&&) $ map (validPos' . (\(x, y) -> (x + px, y + py))) $ shape pieceType orientation
     where
         validPos' (x, y) = 0 <= x          &&
                            x < boardWidth  &&

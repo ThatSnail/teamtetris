@@ -2,7 +2,7 @@
 
 module Pieces (
       PieceType
-    , Orientation
+    , Orientation ( First )
     , shape
     , color
     , randomPieceType
