@@ -1,8 +1,7 @@
 module Player (
-      Player ( Player, name, team)
+      Player ( Player, name )
     ) where
 
 data Player = Player {
       name :: String
-      team :: Int
     }
