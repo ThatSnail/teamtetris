@@ -17,15 +17,15 @@ import Utils
 
 data TileState = Empty | Occupied deriving Eq
 type State = [[TileState]]
+type SpawnPoint = Position
+type Seed = StdGen
 
 data Board = Board { 
       _state :: State
-    , _team :: Team
     , _activePieces :: [ActivePiece]
-    , _spawnPoints :: [Position]
-    , _seed :: StdGen
+    , _spawnPoints :: [SpawnPoint]
+    , _seed :: Seed
     }
-
 makeLenses ''Board
 
 isOccupied :: Board -> Int -> Int -> Bool
@@ -33,6 +33,16 @@ isOccupied board x y = ((_state board) !! x !! y) == Occupied
 
 emptyState :: State
 emptyState = replicate boardHeight $ replicate boardWidth Empty
+
+makeBoard :: [SpawnPoint] -> Seed -> Board
+makeBoard spawnPoints seed = Board emptyState aps spawnPoints newSeed
+    where
+        (aps, newSeed) = foldl (\(aps, s) f -> ((fst $ f s):aps, snd $ f s)) ([], seed) $ map spawnActivePieceAtPos spawnPoints
+
+spawnActivePieceAtPos :: SpawnPoint -> Seed -> (ActivePiece, Seed)
+spawnActivePieceAtPos spawnPoint seed = (ActivePiece spawnPoint activePiece First, newSeed)
+    where
+        (activePiece, newSeed) = randomPieceType seed
 
 updateBoard :: Board -> Board
 updateBoard board = foldl f (board & activePieces .~ []) $ zip (board^.activePieces) (board^.spawnPoints)

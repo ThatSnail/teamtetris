@@ -5,6 +5,7 @@ import Control.Monad
 import Control.Applicative
 
 import Board
+import BoardDimensions
 import Utils
 
 canvasID :: ElemID

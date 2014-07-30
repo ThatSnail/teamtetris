@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module ActivePiece (
-      ActivePiece ( ActivePiece, _player, _pos, _pieceType, _orientation )
+      ActivePiece ( ActivePiece, _pos, _pieceType, _orientation )
     , pos
     , pieceType
     , orientation
@@ -16,8 +16,7 @@ import Utils
 import BoardDimensions
 
 data ActivePiece = ActivePiece {
-      _player :: Player
-    , _pos :: Position
+      _pos :: Position
     , _pieceType :: PieceType
     , _orientation :: Orientation
     }

@@ -1,10 +1,12 @@
 module Team (
-      Team ( Team, name, players )
+      Team ( Team, players )
     ) where
 
 import Player
 
 data Team = Team {
-      name :: String
-    , players :: [Player]
+      players :: [Player]
     }
+
+makeTeam :: Team
+makeTeam = Team []
