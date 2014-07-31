@@ -23,18 +23,18 @@ import BoardDimensions
 import Utils
 
 data TileState = Empty | Occupied deriving Eq
-type State = [[TileState]]
+type BoardState = [[TileState]]
 type SpawnPoint = Position
 
 data Board = Board { 
-      _state :: State
+      _state :: BoardState
     , _activePieces :: [ActivePiece]
     , _spawnPoints :: [SpawnPoint]
     , _seed :: Seed
     }
 --makeLenses ''Board
 
-state :: Lens Board Board State State
+state :: Lens Board Board BoardState BoardState
 state = lens _state (\s x -> s { _state = x })
 
 activePieces :: Lens Board Board [ActivePiece] [ActivePiece]
@@ -56,7 +56,7 @@ getActiveAtPos board x y
     where
         pieces = filter (elem (x, y) . activePos) (board^.activePieces)
 
-emptyState :: State
+emptyState :: BoardState
 emptyState = replicate boardWidth $ replicate boardHeight Empty
 
 makeBoard :: [SpawnPoint] -> Seed -> Board
@@ -77,14 +77,14 @@ updateBoard board = foldl f (board & activePieces .~ []) $ zip (board^.activePie
             | snd nap == False = board & activePieces %~ ((fst nap):)
             | otherwise        = board & (activePieces %~ (((fst nap) & (pos .~ sp) . (pieceType .~ fst (randomPieceType (board^.seed))) . (orientation .~ First)):)) . (state %~ addPieceToState ap) . (seed %~ snd . randomPieceType)
                 where
-                    nap = updatePiece ap
+                    nap = updatePiece board ap
 
 activePos :: ActivePiece -> [Position]
 activePos piece = map (\(x, y) -> (x + piece^.pos._1, y + piece^.pos._2)) $ shape (piece^.pieceType) (piece^.orientation)
 
-addPieceToState :: ActivePiece -> State -> State
+addPieceToState :: ActivePiece -> BoardState -> BoardState
 addPieceToState piece state = foldr addPosToState state $ activePos piece
 
-addPosToState :: Position -> State -> State
+addPosToState :: Position -> BoardState -> BoardState
 --addPosToState (x, y) state = state & element x . element y .~ Occupied
 addPosToState (x, y) state = replace2 x y Occupied state
