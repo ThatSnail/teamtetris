@@ -12,6 +12,7 @@ import ActivePiece
 import qualified Pieces
 import Game
 import Board
+import BoardState
 import BoardDimensions
 import Utils
 
@@ -30,9 +31,9 @@ drawTile board (x, y) = color c $ fill $ rect (tx + 2, ty + 2) (tx + tileWidth -
         tx = fromIntegral x * tileWidth
         ty = fromIntegral (boardHeight - y - 1) * tileHeight
         c
-          | isOccupied board x y           = RGB 0 0 0
-          | isJust mActivePiece            = Pieces.color $ (fromJust mActivePiece)^.pieceType
-          | otherwise                      = RGB 128 128 128
+          | isOccupied (board^.state) x y           = RGB 0 0 0
+          | isJust mActivePiece                     = Pieces.color $ (fromJust mActivePiece)^.pieceType
+          | otherwise                               = RGB 128 128 128
             where
                 mActivePiece = getActiveAtPos board x y
 

@@ -11,10 +11,12 @@ module ActivePiece (
 import Lens.Family2
 import Lens.Family2.Stock
 import Lens.Family2.Unchecked
+import Control.Applicative
 
 import Player
 import Pieces
 import Utils
+import BoardState
 import BoardDimensions
 
 data ActivePiece = ActivePiece {
@@ -35,17 +37,18 @@ orientation = lens _orientation (\s x -> s { _orientation = x })
 --makeLenses ''ActivePiece
 
 -- Returns new piece and whether or not to respawn a piece
-updatePiece :: ActivePiece -> (ActivePiece, Bool)
-updatePiece piece
-    | canStillFall (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
+updatePiece :: BoardState -> ActivePiece -> (ActivePiece, Bool)
+updatePiece boardState piece
+    | canStillFall boardState (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
     | otherwise                                             = (piece, True)
         where
             npos = (piece^.pos) & _2 %~ (\y -> y - 1)
 
-canStillFall :: PieceType -> Orientation -> Position -> Bool
-canStillFall pieceType orientation (px, py) = foldr1 (&&) $ map (validPos' . (\(x, y) -> (x + px, y + py))) $ shape pieceType orientation
+canStillFall :: BoardState -> PieceType -> Orientation -> Position -> Bool
+canStillFall boardState pieceType orientation (px, py) = foldr1 (&&) $ map (((&&) . validPos' <*> notColliding) . (\(x, y) -> (x + px, y + py))) $ shape pieceType orientation
     where
         validPos' (x, y) = 0 <= x          &&
                            x < boardWidth  &&
                            0 <= y          &&
                            y < boardHeight
+        notColliding (x, y) = not $ isOccupied boardState x y

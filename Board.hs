@@ -2,6 +2,7 @@
 
 module Board (
       Board ( Board )
+    , state
     , isOccupied
     , getActiveAtPos
     , updateBoard
@@ -20,10 +21,9 @@ import Pieces
 import Team
 import ActivePiece
 import BoardDimensions
+import BoardState
 import Utils
 
-data TileState = Empty | Occupied deriving Eq
-type BoardState = [[TileState]]
 type SpawnPoint = Position
 
 data Board = Board { 
@@ -45,9 +45,6 @@ spawnPoints = lens _spawnPoints (\s x -> s { _spawnPoints = x })
 
 seed :: Lens Board Board Seed Seed
 seed = lens _seed (\s x -> s { _seed = x })
-
-isOccupied :: Board -> Int -> Int -> Bool
-isOccupied board x y = ((_state board) !! x !! y) == Occupied
 
 getActiveAtPos :: Board -> Int -> Int -> Maybe ActivePiece
 getActiveAtPos board x y
@@ -77,7 +74,7 @@ updateBoard board = foldl f (board & activePieces .~ []) $ zip (board^.activePie
             | snd nap == False = board & activePieces %~ ((fst nap):)
             | otherwise        = board & (activePieces %~ (((fst nap) & (pos .~ sp) . (pieceType .~ fst (randomPieceType (board^.seed))) . (orientation .~ First)):)) . (state %~ addPieceToState ap) . (seed %~ snd . randomPieceType)
                 where
-                    nap = updatePiece board ap
+                    nap = updatePiece (board^.state) ap
 
 activePos :: ActivePiece -> [Position]
 activePos piece = map (\(x, y) -> (x + piece^.pos._1, y + piece^.pos._2)) $ shape (piece^.pieceType) (piece^.orientation)
