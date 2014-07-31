@@ -37,13 +37,13 @@ orientation = lens _orientation (\s x -> s { _orientation = x })
 -- Returns new piece and whether or not to respawn a piece
 updatePiece :: ActivePiece -> (ActivePiece, Bool)
 updatePiece piece
-    | validPos (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
+    | canStillFall (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
     | otherwise                                             = (piece, True)
         where
             npos = (piece^.pos) & _2 %~ (\y -> y - 1)
 
-validPos :: PieceType -> Orientation -> Position -> Bool
-validPos pieceType orientation (px, py) = foldr1 (&&) $ map (validPos' . (\(x, y) -> (x + px, y + py))) $ shape pieceType orientation
+canStillFall :: PieceType -> Orientation -> Position -> Bool
+canStillFall pieceType orientation (px, py) = foldr1 (&&) $ map (validPos' . (\(x, y) -> (x + px, y + py))) $ shape pieceType orientation
     where
         validPos' (x, y) = 0 <= x          &&
                            x < boardWidth  &&
