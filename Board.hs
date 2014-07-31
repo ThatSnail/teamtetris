@@ -3,6 +3,7 @@
 module Board (
       Board ( Board )
     , isOccupied
+    , getActiveAtPos
     , updateBoard
     , makeBoard
     ) where
@@ -48,6 +49,13 @@ seed = lens _seed (\s x -> s { _seed = x })
 isOccupied :: Board -> Int -> Int -> Bool
 isOccupied board x y = ((_state board) !! x !! y) == Occupied
 
+getActiveAtPos :: Board -> Int -> Int -> Maybe ActivePiece
+getActiveAtPos board x y
+    | length pieces > 0 = Just (head pieces)
+    | otherwise         = Nothing
+    where
+        pieces = filter (elem (x, y) . activePos) (board^.activePieces)
+
 emptyState :: State
 emptyState = replicate boardWidth $ replicate boardHeight Empty
 
@@ -71,8 +79,11 @@ updateBoard board = foldl f (board & activePieces .~ []) $ zip (board^.activePie
                 where
                     nap = updatePiece ap
 
+activePos :: ActivePiece -> [Position]
+activePos piece = map (\(x, y) -> (x + piece^.pos._1, y + piece^.pos._2)) $ shape (piece^.pieceType) (piece^.orientation)
+
 addPieceToState :: ActivePiece -> State -> State
-addPieceToState piece state = foldr addPosToState state $ map (\(x, y) -> (x + piece^.pos._1, y + piece^.pos._2)) $ shape (piece^.pieceType) (piece^.orientation)
+addPieceToState piece state = foldr addPosToState state $ activePos piece
 
 addPosToState :: Position -> State -> State
 --addPosToState (x, y) state = state & element x . element y .~ Occupied
