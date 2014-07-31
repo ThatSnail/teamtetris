@@ -40,7 +40,7 @@ updatePiece piece
     | validPos (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
     | otherwise                                             = (piece, True)
         where
-            npos = (piece^.pos) & _2 %~ ((-) 1)
+            npos = (piece^.pos) & _2 %~ (\y -> y - 1)
 
 validPos :: PieceType -> Orientation -> Position -> Bool
 validPos pieceType orientation (px, py) = foldr1 (&&) $ map (validPos' . (\(x, y) -> (x + px, y + py))) $ shape pieceType orientation

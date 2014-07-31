@@ -53,6 +53,6 @@ main = do
                                        drawBoard ((game^.boards) !! 1) (300, 0)
     let updateClient game = do (return $ updateGame game)
                                draw $ updateGame game
-                               setTimeout 1000 $ updateClient (updateGame game)
+                               setTimeout 100 $ updateClient (updateGame game)
 
     updateClient initGame

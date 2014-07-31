@@ -2,6 +2,7 @@
 
 module Game (
       makeGame
+    , updateGame
     , boards
     ) where
 
