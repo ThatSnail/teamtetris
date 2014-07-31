@@ -21,8 +21,8 @@ tileWidth = 20
 tileHeight :: Double
 tileHeight = 20
 
-drawTile :: Board -> Point2D Int -> Picture ()
-drawTile board (Point2D x y) = color c $ fill $ rect (tx + 2, ty + 2) (tx + tileWidth - 2, ty + tileHeight - 2)
+drawTile :: Board -> Position -> Picture ()
+drawTile board (x, y) = color c $ fill $ rect (tx + 2, ty + 2) (tx + tileWidth - 2, ty + tileHeight - 2)
     where
         tx = fromIntegral x * tileWidth
         ty = fromIntegral y * tileHeight
@@ -33,9 +33,9 @@ drawTile board (Point2D x y) = color c $ fill $ rect (tx + 2, ty + 2) (tx + tile
 drawBoard :: Board -> Point -> Picture ()
 drawBoard board (bx, by) = sequence_ tilePics
     where
-        tilePics = map (drawTile board) pointList
+        tilePics = map (translate (bx, by) . drawTile board) pointList
             where
-                pointList = liftA2 Point2D (map fromIntegral [0..boardWidth]) (map fromIntegral [0..boardHeight])
+                pointList = liftA2 (,) (map fromIntegral [0..boardWidth-1]) (map fromIntegral [0..boardHeight-1])
 
 main :: IO ()
 main = do
@@ -43,4 +43,4 @@ main = do
     let game = makeGame seed 2 2
     Just canvas <- getCanvasById canvasID
     render canvas $ do drawBoard ((game^.boards) !! 0) (0, 0)
-                       drawBoard ((game^.boards) !! 1) (150, 0)
+                       drawBoard ((game^.boards) !! 1) (300, 0)

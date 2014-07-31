@@ -49,7 +49,7 @@ isOccupied :: Board -> Int -> Int -> Bool
 isOccupied board x y = ((_state board) !! x !! y) == Occupied
 
 emptyState :: State
-emptyState = replicate boardHeight $ replicate boardWidth Empty
+emptyState = replicate boardWidth $ replicate boardHeight Empty
 
 makeBoard :: [SpawnPoint] -> Seed -> Board
 makeBoard spawnPoints seed = Board emptyState aps spawnPoints newSeed
