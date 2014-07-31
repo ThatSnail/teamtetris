@@ -1,30 +1,40 @@
-{-# LANGUAGE TemplateHaskell #-}
+--{-# LANGUAGE TemplateHaskell #-}
 
 module Game (
+      makeGame
+    , boards
     ) where
 
-import Control.Lens
-import System.Random
+import Lens.Family2
+import Lens.Family2.Unchecked
+--import Control.Lens
+import Haste
+--import System.Random
 
 import Player
+import Team
 import Board
-
-type Team = [Player]
+import BoardDimensions
 
 data Game = Game {
       _boards :: [Board]
     , _teams :: [Team]
     }
-makeLenses ''Game
+--makeLenses ''Game
+
+boards :: Lens Game Game [Board] [Board]
+boards = lens _boards (\s x -> s { _boards = x })
 
 updateGame :: Game -> Game
 updateGame game = game & boards %~ map updateBoard
 
 type TeamCount = Int
-type Seed = StdGen
+type PlayersPerTeam = Int
+--type Seed = StdGen
 
-makeGame :: Seed -> TeamCount -> Game
-makeGame seed teamCount = Game boards teams
+makeGame :: Seed -> TeamCount -> PlayersPerTeam -> Game
+makeGame seed teamCount playersPerTeam = Game boards teams
     where
-        boards = makeBoard
-        teams = replicate teamCount makeTeam 
+        spawnPoints = spawns playersPerTeam
+        boards = replicate teamCount $ makeBoard spawnPoints seed
+        teams = replicate teamCount emptyTeam 

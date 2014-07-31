@@ -1,6 +1,7 @@
 module BoardDimensions (
       boardWidth
     , boardHeight
+    , spawns
     ) where
 
 boardWidth :: Int

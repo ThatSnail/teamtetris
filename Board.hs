@@ -1,13 +1,19 @@
-{-# LANGUAGE TemplateHaskell #-}
+--{-# LANGUAGE TemplateHaskell #-}
 
 module Board (
       Board ( Board )
     , isOccupied
     , updateBoard
+    , makeBoard
     ) where
 
-import Control.Lens
-import System.Random
+import Haste
+
+import Lens.Family2
+import Lens.Family2.Stock
+import Lens.Family2.Unchecked
+--import Control.Lens
+--import System.Random
 
 import Pieces
 import Team
@@ -18,7 +24,6 @@ import Utils
 data TileState = Empty | Occupied deriving Eq
 type State = [[TileState]]
 type SpawnPoint = Position
-type Seed = StdGen
 
 data Board = Board { 
       _state :: State
@@ -26,7 +31,19 @@ data Board = Board {
     , _spawnPoints :: [SpawnPoint]
     , _seed :: Seed
     }
-makeLenses ''Board
+--makeLenses ''Board
+
+state :: Lens Board Board State State
+state = lens _state (\s x -> s { _state = x })
+
+activePieces :: Lens Board Board [ActivePiece] [ActivePiece]
+activePieces = lens _activePieces (\s x -> s { _activePieces = x })
+
+spawnPoints :: Lens Board Board [SpawnPoint] [SpawnPoint]
+spawnPoints = lens _spawnPoints (\s x -> s { _spawnPoints = x })
+
+seed :: Lens Board Board Seed Seed
+seed = lens _seed (\s x -> s { _seed = x })
 
 isOccupied :: Board -> Int -> Int -> Bool
 isOccupied board x y = ((_state board) !! x !! y) == Occupied
@@ -58,4 +75,5 @@ addPieceToState :: ActivePiece -> State -> State
 addPieceToState piece state = foldr addPosToState state $ map (\(x, y) -> (x + piece^.pos._1, y + piece^.pos._2)) $ shape (piece^.pieceType) (piece^.orientation)
 
 addPosToState :: Position -> State -> State
-addPosToState (x, y) state = state & element x . element y .~ Occupied
+--addPosToState (x, y) state = state & element x . element y .~ Occupied
+addPosToState (x, y) state = replace2 x y Occupied state

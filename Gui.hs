@@ -3,7 +3,11 @@ import Haste.Graphics.Canvas
 
 import Control.Monad
 import Control.Applicative
+import Lens.Family2
+--import Control.Lens
+--import System.Random
 
+import Game
 import Board
 import BoardDimensions
 import Utils
@@ -12,13 +16,13 @@ canvasID :: ElemID
 canvasID = "canvas"
 
 tileWidth :: Double
-tileWidth = 10
+tileWidth = 20
 
 tileHeight :: Double
-tileHeight = 10
+tileHeight = 20
 
 drawTile :: Board -> Point2D Int -> Picture ()
-drawTile board (Point2D x y) = color c $ fill $ rect (tx, ty) (tx + tileWidth, ty + tileHeight)
+drawTile board (Point2D x y) = color c $ fill $ rect (tx + 2, ty + 2) (tx + tileWidth - 2, ty + tileHeight - 2)
     where
         tx = fromIntegral x * tileWidth
         ty = fromIntegral y * tileHeight
@@ -35,5 +39,8 @@ drawBoard board (bx, by) = sequence_ tilePics
 
 main :: IO ()
 main = do
+    seed <- newSeed
+    let game = makeGame seed 2 2
     Just canvas <- getCanvasById canvasID
-    render canvas $ drawBoard emptyBoard (0, 0)
+    render canvas $ do drawBoard ((game^.boards) !! 0) (0, 0)
+                       drawBoard ((game^.boards) !! 1) (150, 0)

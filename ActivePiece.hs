@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+--{-# LANGUAGE TemplateHaskell #-}
 
 module ActivePiece (
       ActivePiece ( ActivePiece, _pos, _pieceType, _orientation )
@@ -8,7 +8,9 @@ module ActivePiece (
     , updatePiece
     ) where
 
-import Control.Lens
+import Lens.Family2
+import Lens.Family2.Stock
+import Lens.Family2.Unchecked
 
 import Player
 import Pieces
@@ -20,7 +22,17 @@ data ActivePiece = ActivePiece {
     , _pieceType :: PieceType
     , _orientation :: Orientation
     }
-makeLenses ''ActivePiece
+
+pos :: Lens ActivePiece ActivePiece Position Position
+pos = lens _pos (\s x -> s { _pos = x })
+
+pieceType :: Lens ActivePiece ActivePiece PieceType PieceType
+pieceType = lens _pieceType (\s x -> s { _pieceType = x })
+
+orientation :: Lens ActivePiece ActivePiece Orientation Orientation
+orientation = lens _orientation (\s x -> s { _orientation = x })
+
+--makeLenses ''ActivePiece
 
 -- Returns new piece and whether or not to respawn a piece
 updatePiece :: ActivePiece -> (ActivePiece, Bool)

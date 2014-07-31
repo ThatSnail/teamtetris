@@ -10,7 +10,7 @@ module Pieces (
 
 import Haste.Graphics.Canvas ( Color ( RGB ) )
 
-import System.Random
+import Haste.App
 import Utils
 
 data PieceType = O | I | S | Z | L | J | T deriving (Enum, Bounded)
@@ -53,7 +53,7 @@ color L = RGB 0 0 255
 color J = RGB 255 128 0
 color T = RGB 255 0 255
 
-randomPieceType :: (RandomGen g) => g -> (PieceType, g)
+randomPieceType :: Seed -> (PieceType, Seed)
 randomPieceType g = (pieceList !! pInd, ng)
     where
         pieceList = [(minBound :: PieceType)..]

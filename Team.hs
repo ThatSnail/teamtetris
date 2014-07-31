@@ -1,5 +1,6 @@
 module Team (
       Team ( Team, players )
+    , emptyTeam
     ) where
 
 import Player
@@ -8,5 +9,5 @@ data Team = Team {
       players :: [Player]
     }
 
-makeTeam :: Team
-makeTeam = Team []
+emptyTeam :: Team
+emptyTeam = Team []
