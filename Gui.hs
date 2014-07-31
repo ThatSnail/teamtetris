@@ -46,7 +46,13 @@ drawBoard board (bx, by) = sequence_ tilePics
 main :: IO ()
 main = do
     seed <- newSeed
-    let game = makeGame seed 2 2
     Just canvas <- getCanvasById canvasID
-    render canvas $ do drawBoard ((game^.boards) !! 0) (0, 0)
-                       drawBoard ((game^.boards) !! 1) (300, 0)
+
+    let initGame = makeGame seed 2 2
+    let draw game = render canvas $ do drawBoard ((game^.boards) !! 0) (0, 0)
+                                       drawBoard ((game^.boards) !! 1) (300, 0)
+    let updateClient game = do (return $ updateGame game)
+                               draw $ updateGame game
+                               setTimeout 1000 $ updateClient (updateGame game)
+
+    updateClient initGame
