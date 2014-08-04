@@ -42,7 +42,7 @@ updatePiece boardState piece
     | canStillFall boardState (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
     | otherwise                                             = (piece, True)
         where
-            npos = (piece^.pos) & _2 %~ (-)1
+            npos = (piece^.pos) & _2 %~ subtract 1
 
 -- |canStillFall checks to see if the piece does not collide with any board elements
 -- It does not check collisions with other ActivePieces
