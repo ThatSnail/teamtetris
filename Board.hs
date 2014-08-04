@@ -69,10 +69,10 @@ spawnActivePieceAtPos spawnPoint seed = (ActivePiece spawnPoint pieceType First,
 
 -- |updateBoard makes all pieces fall one step
 updateBoard :: Board -> Board
-updateBoard board = foldl f (board & activePieces .~ []) $ zip (board^.activePieces) (board^.spawnPoints)
+updateBoard board = foldr f (board & activePieces .~ []) $ zip (board^.activePieces) (board^.spawnPoints)
     where
         -- f :: Board -> (activePiece :: ActivePiece, spawnPoint :: Position)
-        f board (ap, sp)
+        f (ap, sp) board
             | respawn == False = board & activePieces %~ (newPiece:)
             | otherwise        = board &
                   (activePieces %~ (:) (newPiece &
