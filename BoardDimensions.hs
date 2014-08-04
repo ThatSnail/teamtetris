@@ -5,7 +5,7 @@ module BoardDimensions (
     ) where
 
 boardWidth :: Int
-boardWidth = 10
+boardWidth = 14
 
 boardHeight :: Int
 boardHeight = 22
