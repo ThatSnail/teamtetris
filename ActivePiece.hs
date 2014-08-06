@@ -45,6 +45,13 @@ updatePiece piece boardState
         where
             npos = (piece^.pos) & _2 %~ subtract 1
 
+move :: ActivePiece -> Position -> BoardState -> [ActivePiece] -> ActivePiece
+move piece dpos boardState otherPieces
+    | isFree newPiece boardState otherPieces = newPiece
+    | otherwise                              = piece
+    where
+        newPiece = piece & pos %~ addPos dpos
+
 isFreeFromPiece :: ActivePiece -> ActivePiece -> Bool
 isFreeFromPiece piece1 piece2 = all (uncurry (/=)) $ liftA2 (,) (activePos piece1) (activePos piece2)
 
