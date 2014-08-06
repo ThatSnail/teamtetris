@@ -6,6 +6,7 @@ module ActivePiece (
     , pieceType
     , orientation
     , updatePiece
+    , activePos
     ) where
 
 import Lens.Family2
@@ -37,20 +38,31 @@ orientation = lens _orientation (\s x -> s { _orientation = x })
 --makeLenses ''ActivePiece
 
 -- |updatePiece returns new piece and whether or not to respawn a piece
-updatePiece :: BoardState -> ActivePiece -> (ActivePiece, Bool)
-updatePiece boardState piece
-    | canStillFall boardState (piece^.pieceType) (piece^.orientation) npos = (piece & pos .~ npos, False)
+updatePiece :: ActivePiece -> BoardState -> (ActivePiece, Bool)
+updatePiece piece boardState
+    | isFreeFromBoard (piece & pos .~ npos) boardState = (piece & pos .~ npos, False)
     | otherwise                                             = (piece, True)
         where
             npos = (piece^.pos) & _2 %~ subtract 1
 
--- |canStillFall checks to see if the piece does not collide with any board elements
+isFreeFromPiece :: ActivePiece -> ActivePiece -> Bool
+isFreeFromPiece piece1 piece2 = all (uncurry (/=)) $ liftA2 (,) (activePos piece1) (activePos piece2)
+
+-- |isFree checks to see if the piece does not collide with anything: board, wall, or other ActivePieces
+isFree :: ActivePiece -> BoardState -> [ActivePiece] -> Bool
+isFree piece boardState otherPieces = (isFreeFromBoard piece boardState) && (foldr1 (&&) $ map (isFreeFromPiece piece) otherPieces)
+
+-- |isFreeFromBoard checks to see if the piece does not collide with any board elements
 -- It does not check collisions with other ActivePieces
-canStillFall :: BoardState -> PieceType -> Orientation -> Position -> Bool
-canStillFall boardState pieceType orientation pos = all (((&&) . validPos' <*> notColliding) . addPos pos) $ shape pieceType orientation
+isFreeFromBoard :: ActivePiece -> BoardState -> Bool
+isFreeFromBoard piece boardState = all (((&&) . validPos' <*> notColliding) . addPos (piece^.pos)) $ shape (piece^.pieceType) (piece^.orientation)
     where
         validPos' (x, y) = 0 <= x          &&
                            x < boardWidth  &&
                            0 <= y          &&
                            y < boardHeight
         notColliding (x, y) = not $ isOccupied boardState x y
+
+-- Get positions of tiles of ActivePiece
+activePos :: ActivePiece -> [Position]
+activePos piece = map (addPos $ piece^.pos) $ shape (piece^.pieceType) (piece^.orientation)

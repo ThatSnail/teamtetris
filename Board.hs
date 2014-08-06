@@ -83,11 +83,7 @@ updateBoard board = foldr f (board & activePieces .~ []) $ zip (board^.activePie
                 . (state %~ addPieceToState ap)
                 . (seed %~ snd . randomPieceType)
                 where
-                    (newPiece, respawn) = updatePiece (board^.state) ap
-
--- Get positions of tiles of ActivePiece
-activePos :: ActivePiece -> [Position]
-activePos piece = map (addPos $ piece^.pos) $ shape (piece^.pieceType) (piece^.orientation)
+                    (newPiece, respawn) = updatePiece ap (board^.state)
 
 addPieceToState :: ActivePiece -> BoardState -> BoardState
 addPieceToState piece state = foldr addPosToState state $ activePos piece
