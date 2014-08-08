@@ -1,7 +1,8 @@
 --{-# LANGUAGE TemplateHaskell #-}
 
 module Game (
-      makeGame
+      Game ( Game )
+    , makeGame
     , updateGame
     , boards
     ) where

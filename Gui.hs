@@ -1,3 +1,10 @@
+module Gui (
+      drawTile
+    , drawBoard
+    , drawGame
+    )
+    where
+
 import Haste
 import Haste.Graphics.Canvas
 
@@ -15,9 +22,6 @@ import Board
 import BoardState
 import BoardDimensions
 import Utils
-
-canvasID :: ElemID
-canvasID = "canvas"
 
 tileWidth :: Double
 tileWidth = 20
@@ -44,16 +48,6 @@ drawBoard board (bx, by) = sequence_ tilePics
             where
                 pointList = liftA2 (,) (map fromIntegral [0..boardWidth-1]) (map fromIntegral [0..boardHeight-1])
 
-main :: IO ()
-main = do
-    seed <- newSeed
-    Just canvas <- getCanvasById canvasID
-
-    let initGame = makeGame seed 2 2
-    let draw game = render canvas $ do drawBoard ((game^.boards) !! 0) (0, 0)
-                                       drawBoard ((game^.boards) !! 1) (300, 0)
-    let updateClient game = do (return $ updateGame game)
-                               draw $ updateGame game
-                               setTimeout 100 $ updateClient (updateGame game)
-
-    updateClient initGame
+drawGame :: Game -> Picture ()
+drawGame game = do drawBoard ((game^.boards) !! 0) (0, 0)
+                   drawBoard ((game^.boards) !! 1) (300, 0)
